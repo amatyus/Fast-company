@@ -7,30 +7,29 @@ function App() {
   const [users, setUsers] = useState(api.users.fetchAll());
 
   const handleDelete = (userId) => {
-    setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
+    setUsers(users.filter((user) => user._id !== userId));
   };
 
-  const handleUserBookMark = (userId) => {
-    setUsers((prevUsers) =>
-      prevUsers.map((user) => {
-        if (user._id === userId) {
+  const handleToggleBookMark = (id) => {
+    setUsers(
+      users.map((user) => {
+        if (user._id === id) {
           return { ...user, bookmark: !user.bookmark };
         }
-
         return user;
       })
     );
+    console.log(id);
   };
-
   return (
-    <>
+    <div>
       <SearchStatus length={users.length} />
       <Users
+        onDelete={handleDelete}
+        onToggleBookMark={handleToggleBookMark}
         users={users}
-        handleDelete={handleDelete}
-        handleUserBookMark={handleUserBookMark}
       />
-    </>
+    </div>
   );
 }
 
