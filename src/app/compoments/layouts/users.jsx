@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { paginate } from "../utils/pajinate";
-import Pagination from "./pagination";
-import SearchStatus from "./searchStatus";
-import GroupList from "./groupList";
+import { paginate } from "../../utils/pajinate";
+import Pagination from "../pagination";
+import SearchStatus from "../searchStatus";
+import GroupList from "../groupList";
 import PropTypes from "prop-types";
-import api from "../api";
-import UsersTable from "./usersTable";
+import api from "../../api";
+import UsersTable from "../usersTable";
 import _ from "lodash";
 
 const Users = () => {
@@ -55,7 +55,7 @@ const Users = () => {
     setSortBy(item);
   };
 
-  if (users) {
+  if (users.length) {
     const filtredUsers = selectedProf
       ? users.filter((user) => user.profession._id === selectedProf._id)
       : users;
@@ -113,7 +113,7 @@ const Users = () => {
 };
 
 Users.propTypes = {
-  users: PropTypes.arrayOf(PropTypes.object)
+  users: PropTypes.array
 };
 
 export default Users;
