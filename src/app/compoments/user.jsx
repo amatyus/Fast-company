@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useHistory } from "react-router-dom";
-import userApi from "../../api/fake.api/user.api";
-import QualitiesList from "../qualitiesList";
+import userApi from "../api/fake.api/user.api";
+import QualitiesList from "./qualitiesList";
 
 const User = () => {
   const { userId } = useParams();
