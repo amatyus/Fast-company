@@ -17,6 +17,8 @@ module.exports = {
     "comma-dangle": "off",
     "object-curly-spacing": "off",
     quotes: "off",
+    "multiline-ternary": "off",
+    indent: "off",
     semi: [2, "always"] // Точка с запятой в конце строки
   }
 };
