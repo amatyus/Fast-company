@@ -19,6 +19,7 @@ module.exports = {
     quotes: "off",
     "multiline-ternary": "off",
     indent: "off",
-    semi: [2, "always"] // Точка с запятой в конце строки
+    semi: [2, "always"], // Точка с запятой в конце строки
+    "no-unused-vars": "off"
   }
 };

@@ -69,6 +69,10 @@ const UserPageEdit = ({ userId }) => {
     }));
   };
 
+  const handleShowAllUsers = () => {
+    history.push(`/users/${userId}`);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const userDataToSend = transformDataToSend(userData, professions);
@@ -86,6 +90,10 @@ const UserPageEdit = ({ userId }) => {
   return (
     <>
       <div className="container mt-5">
+        <button className="btn btn-primary" onClick={handleShowAllUsers}>
+          Назад
+        </button>
+
         <div className="row">
           <div className="col-md-6 offset-md-3 shadow p-4">
             <form onSubmit={handleSubmit}>
