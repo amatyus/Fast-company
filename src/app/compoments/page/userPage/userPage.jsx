@@ -15,21 +15,16 @@ const UserPage = ({ userId }) => {
     api.users.getById(userId).then((data) => setUser(data));
   }, []);
 
-  const handleShowAllUsers = () => {
-    history.push(`/users/${userId}/edit`);
-  };
+  //   const handleShowAllUsers = () => {
+  //     history.push(`/users/${userId}/edit`);
+  //   };
 
   if (user) {
     return (
       <div className="container">
         <div className="row gutters-sm">
           <div className="col-md-4 mb-3">
-            <UserCard
-              userName={user.name}
-              profession={user.profession.name}
-              rate={user.rate}
-              handleClick={handleShowAllUsers}
-            />
+            <UserCard user={user} />
             <QualitiesCard qualities={user.qualities} />
             <MeetingsCard value={user.completedMeetings} />
           </div>

@@ -80,7 +80,7 @@ const UserPageEdit = ({ userId }) => {
 
     api.users
       .update(userDataToSend._id, userDataToSend)
-      .then((data) => history.push(`/users/${userId}`));
+      .then(() => history.push(`/users/${userId}`));
   };
 
   if (!userData) {
