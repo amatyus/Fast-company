@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { useQualities } from "../../../hooks/useQualities";
 
 const QualitiesList = ({ qualities }) => {
+  console.log("qualities", qualities);
   const { isLoading, getQuality } = useQualities();
 
   const userQuality = qualities.map((qualId) => getQuality(qualId));
@@ -12,7 +13,7 @@ const QualitiesList = ({ qualities }) => {
     return (
       <>
         {userQuality.map((qual) => (
-          <Qualitie key={qual._id} {...qual} />
+          <Qualitie key={qual} id={qual} />
         ))}
       </>
     );

@@ -10,7 +10,6 @@ export const useQualities = () => {
 
 export const QualitiesProvider = ({ children }) => {
   const [qualities, setQualities] = useState();
-  console.log("qualities", qualities);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
