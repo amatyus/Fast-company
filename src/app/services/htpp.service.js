@@ -28,8 +28,11 @@ function truansformData(data) {
 
 axios.interceptors.response.use(
   (res) => {
-    res.data = { content: truansformData(res.data) };
+    if (configFile.isFireBase) {
+      res.data = { content: truansformData(res.data) };
+    }
     console.log(res.data);
+
     return res;
   },
   function (error) {

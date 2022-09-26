@@ -10,6 +10,7 @@ export const useQualities = () => {
 
 export const QualitiesProvider = ({ children }) => {
   const [qualities, setQualities] = useState();
+  console.log("useQualities", qualities);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,8 +51,8 @@ export const QualitiesProvider = ({ children }) => {
         getQuality
       }}
     >
-      {children}
-      {/* {!isLoading ? children : <h1>Qualities Loading...</h1>} */}
+      {/* {children} */}
+      {!isLoading ? children : "Loading..."}
     </QualitiesContext.Provider>
   );
 };
