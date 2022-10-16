@@ -4,93 +4,85 @@ import Pagination from "../../common/pagination";
 import SearchStatus from "../../ui/searchStatus";
 import GroupList from "../../common/groupList";
 import PropTypes from "prop-types";
-import api from "../../../api";
 import UsersTable from "../../ui/usersTable";
 import _ from "lodash";
 import TextField from "../../common/form/textField";
 import { useUser } from "../../../hooks/useUsers";
+import { useProfessions } from "../../../hooks/useProfession";
+import { useAuth } from "../../../hooks/useAuth";
 
 const UsersListPage = () => {
+  const { users } = useUser();
+  const { currentUser } = useAuth();
+  const { isLoading: professionsLoading, professions } = useProfessions();
   const [currentPage, setCurrentPage] = useState(1);
-  const [professions, setProfessions] = useState();
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedProf, setSelectedProf] = useState();
-  const [searchUsername, setSearchUsername] = useState("");
   const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
   const pageSize = 8;
-
-  const { users } = useUser();
 
   const handleDelete = (userId) => {
     // setUsers(users.filter((user) => user._id !== userId));
     console.log(userId);
   };
-
   const handleToggleBookMark = (id) => {
-    const newArr = users.map((user) => {
+    const newArray = users.map((user) => {
       if (user._id === id) {
         return { ...user, bookmark: !user.bookmark };
       }
       return user;
     });
-    // setUsers(newArr);
-    console.log(newArr);
+    // setUsers(newArray);
+    console.log(newArray);
   };
 
   useEffect(() => {
-    api.professions.fetchAll().then((data) => setProfessions(data));
-  }, []);
-
-  useEffect(() => {
     setCurrentPage(1);
-  }, [selectedProf, searchUsername]);
+  }, [selectedProf, searchQuery]);
+
+  const hendleProfessionsSelect = (item) => {
+    if (searchQuery !== "") setSearchQuery("");
+    setSelectedProf(item);
+  };
+  const handleSearchQuery = ({ target }) => {
+    setSelectedProf(undefined);
+    setSearchQuery(target.value);
+  };
 
   const handlePageChange = (pageIndex) => {
     setCurrentPage(pageIndex);
   };
-
-  const hendleProfessionsSelect = (item) => {
-    setSelectedProf(item);
-    setSearchUsername("");
-  };
-
-  const handleSearchChange = ({ target }) => {
-    setSearchUsername(target.value);
-    setSelectedProf();
-  };
-
   const handleOnSort = (item) => {
     setSortBy(item);
   };
 
-  if (users.length) {
-    const getFiltredUsers = () => {
-      if (selectedProf) {
-        return users.filter(
-          ({ profession }) => profession._id === selectedProf._id
-        );
-      }
+  if (users) {
+    function filterUsers(data) {
+      const filteredUsers = searchQuery
+        ? data.filter(
+            (user) =>
+              user.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1
+          )
+        : selectedProf
+        ? data.filter(
+            (user) =>
+              JSON.stringify(user.profession) === JSON.stringify(selectedProf)
+          )
+        : data;
+      return filteredUsers.filter((u) => u._id !== currentUser._id);
+    }
 
-      if (searchUsername) {
-        return users.filter(({ name }) =>
-          name.toLowerCase().includes(searchUsername.toLowerCase())
-        );
-      }
-
-      return users;
-    };
-
-    const filtredUsers = getFiltredUsers();
-    const count = filtredUsers.length;
-    const sortedUsers = _.orderBy(filtredUsers, [sortBy.path], [sortBy.order]);
+    const filteredUsers = filterUsers(users);
+    const count = filteredUsers.length;
+    const sortedUsers = _.orderBy(filteredUsers, [sortBy.path], [sortBy.order]);
     const userCrop = paginate(sortedUsers, currentPage, pageSize);
-
     const clearFilter = () => {
       setSelectedProf();
     };
 
     return (
       <div className="d-flex">
-        {professions && (
+        {professions && !professionsLoading && (
           <div className="d-flex flex-column flex-shrink-0 p-3">
             <GroupList
               items={professions}
@@ -106,8 +98,8 @@ const UsersListPage = () => {
           <SearchStatus length={count} />
           <TextField
             placeholder={"Searhc..."}
-            value={searchUsername}
-            onChange={handleSearchChange}
+            value={searchQuery}
+            onChange={handleSearchQuery}
           />
           {count > 0 && (
             <UsersTable

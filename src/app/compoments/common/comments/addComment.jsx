@@ -1,25 +1,19 @@
-import React, { useState, useEffect } from "react";
-import SelectField from "../form/selectField";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { validator } from "../../../utils/validator";
-
-import api from "../../../api";
 import TextAreaField from "../form/textAreaField";
 
-const initFormData = { userId: "", comment: "" };
-
 const AddComment = ({ onSubmit }) => {
-  const [data, setData] = useState(initFormData);
-  const [users, setUsers] = useState();
+  const [data, setData] = useState({});
   const [errors, setErrors] = useState({});
 
-  api.users.fetchAll().then((data) => {
-    const usersList = Object.keys(data).map((user) => ({
-      label: data[user].name,
-      value: data[user]._id
-    }));
-    setUsers(usersList);
-  });
+  //   api.users.fetchAll().then((data) => {
+  //     const usersList = Object.keys(data).map((user) => ({
+  //       label: data[user].name,
+  //       value: data[user]._id
+  //     }));
+  //     setUsers(usersList);
+  //   });
 
   const handleChange = (target) => {
     setData((prevState) => ({
@@ -29,11 +23,6 @@ const AddComment = ({ onSubmit }) => {
   };
 
   const validatorConfig = {
-    userId: {
-      isRequired: {
-        message: "Выберете пользователя"
-      }
-    },
     comment: {
       isRequired: {
         message: "Заполните поле комментария"
@@ -46,13 +35,17 @@ const AddComment = ({ onSubmit }) => {
     return Object.keys(errors).length === 0;
   };
 
+  const clearForm = () => {
+    setData({});
+    setErrors({});
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const isValid = validate();
     if (!isValid) return;
-    onSubmit(data).then((_) => {
-      setData(initFormData);
-    });
+    onSubmit(data);
+    clearForm();
   };
 
   return (
@@ -60,17 +53,17 @@ const AddComment = ({ onSubmit }) => {
       <h2>New comment</h2>
 
       <form onSubmit={handleSubmit}>
-        <SelectField
+        {/* <SelectField
           defaultOption="Choose..."
           options={users}
           name="userId"
           onChange={handleChange}
           value={data.userId}
           error={errors.userId}
-        />
+        /> */}
         <TextAreaField
           name="comment"
-          value={data.comment}
+          value={data.comment || ""}
           onChange={handleChange}
           error={errors.comment}
         />

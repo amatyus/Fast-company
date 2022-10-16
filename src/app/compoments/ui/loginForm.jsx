@@ -8,9 +8,12 @@ import { useHistory } from "react-router-dom";
 const LoginForm = () => {
   const history = useHistory();
 
+  //   console.log(history.location.state.from.pathname);
+
   //   console.log(process.env);
   const [data, setData] = useState({ email: "", password: "", stayOn: false });
   const [errors, setErrors] = useState({});
+  const [enterError, setEnterError] = useState(null);
 
   const { logIn } = useAuth();
 
@@ -19,30 +22,18 @@ const LoginForm = () => {
       ...prevState,
       [target.name]: target.value
     }));
+    setEnterError(null);
   };
 
   const validatorConfig = {
     email: {
       isRequired: {
-        message: "Электронная почта должен быть заполнена"
-      },
-      isEmail: {
-        message: "Email введе не корректно"
+        message: "Электронная почта должна быть заполнена"
       }
     },
     password: {
       isRequired: {
         message: "Пароль обязателен для заполнения"
-      },
-      isCapitalSymbol: {
-        message: "Пароль должен содержать хотя бы одну заглавную букву"
-      },
-      isContainDigit: {
-        message: "Пароль должен содержать хотя бы однo число"
-      },
-      min: {
-        message: "Пароль должен содержать минимум 8 символов",
-        value: 8
       }
     }
   };
@@ -67,10 +58,11 @@ const LoginForm = () => {
     console.log(data);
     try {
       await logIn(data);
-      //   history.push("/");
+      history.push(
+        history.location.state ? history.location.state.from.pathname : "/"
+      );
     } catch (error) {
-      setErrors(error);
-      console.log(error);
+      setEnterError(error.message);
     }
   };
 
@@ -95,7 +87,7 @@ const LoginForm = () => {
       <CheckBoxField name="stayOn" value={data.stayOn} onChange={handleChange}>
         Оставаться в системе
       </CheckBoxField>
-
+      {enterError && <p className="text-danger">{enterError}</p>}
       <button
         type="submit"
         disabled={!isValid}
