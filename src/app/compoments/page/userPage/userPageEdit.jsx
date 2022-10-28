@@ -1,135 +1,121 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
+import { validator } from "../../../utils/validator";
 import TextField from "../../common/form/textField";
 import SelectField from "../../common/form/selectField";
 import RadioField from "../../common/form/radioField";
-import PropTypes from "prop-types";
-import { validator } from "../../../utils/validator";
 import MultiSelectField from "../../common/form/multiSelectField";
-import { useHistory } from "react-router-dom";
-import { useUser } from "../../../hooks/useUsers";
-import { useProfessions } from "../../../hooks/useProfession";
-import { useQualities } from "../../../hooks/useQualities";
+import BackHistoryButton from "../../common/backButton";
 import { useAuth } from "../../../hooks/useAuth";
+import { useSelector } from "react-redux";
+import { getQualities, getQualitiesLoadind } from "../../../../store/qualities";
+import {
+  getProfessions,
+  getProfessionsLoading
+} from "../../../../store/professions";
 
-const UserPageEdit = ({ userId }) => {
-  const { getUserById } = useUser();
-  const user = getUserById(userId);
-  const { currentUser, updateUser } = useAuth();
-  const [errors, setErrors] = useState({});
-  const [enterError, setEnterError] = useState(null);
-
-  const [data, setData] = useState({
-    name: "",
-    email: "",
-    profession: "",
-    sex: "male",
-    qualities: []
-  });
-
+const EditUserPage = () => {
   const history = useHistory();
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState();
+  const { currentUser, updateUserData } = useAuth();
+  const qualities = useSelector(getQualities());
 
-  const { professions, isLoading: isLoadingProf } = useProfessions();
-  const { qualities, getQuality, isLoading: isLoadingQual } = useQualities();
+  const qualitiesLoading = useSelector(getQualitiesLoadind());
 
+  const qualitiesList = qualities.map((q) => ({
+    label: q.name,
+    value: q._id
+  }));
+  const professions = useSelector(getProfessions());
+  console.log("professions", professions);
+  const professionLoading = useSelector(getProfessionsLoading());
   const professionsList = professions.map((p) => ({
     label: p.name,
     value: p._id
   }));
-
-  const qualitiesList = qualities.map((q) => ({
-    value: q._id,
-    label: q.name,
-    color: q.color
-  }));
-
-  useEffect(() => {
-    if (currentUser._id !== userId) {
-      history.push(`/users/${userId}/edit`);
-    }
-    if (!isLoadingProf && !isLoadingQual) {
-      setData({
-        ...currentUser,
-        qualities: currentUser.qualities
-          .map((q) => getQuality(q))
-          .map((q) => ({
-            value: q._id.toString(),
-            label: q.name,
-            color: q.color
-          }))
-      });
-    }
-  }, [isLoadingQual, user]);
-
-  const validatorConfig = {
-    email: {
-      isRequired: {
-        message: "Электронная почта должна быть заполнена"
-      }
-    },
-    name: {
-      isRequired: {
-        message: "Имя не должно быть пустым"
-      }
-    },
-    professions: {
-      isRequired: {
-        message: "Профессия не должна быть пустой"
-      }
-    }
-  };
-
-  useEffect(() => {
-    validate();
-  }, [data]);
-
-  const validate = () => {
-    const errors = validator(data, validatorConfig);
-
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const isValid = Object.keys(errors).length === 0;
-
-  const handleChange = (target) => {
-    setData((prevState) => ({
-      ...prevState,
-      [target.name]: target.value
-    }));
-    setEnterError(null);
-  };
-
-  const handleShowUsers = () => {
-    history.push(`/users/${userId}`);
-  };
+  const [errors, setErrors] = useState({});
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const isValid = validate();
     if (!isValid) return;
-    const newData = { ...data, qualities: data.qualities.map((q) => q.value) };
-    console.log(newData);
+    await updateUserData({
+      ...data,
+      qualities: data.qualities.map((q) => q.value)
+    });
 
-    try {
-      await updateUser(newData);
-      handleShowUsers();
-    } catch (error) {
-      setEnterError(error.message);
+    history.push(`/users/${currentUser._id}`);
+  };
+  function getQualitiesListByIds(qualitiesIds) {
+    const qualitiesArray = [];
+    for (const qualId of qualitiesIds) {
+      for (const quality of qualities) {
+        if (quality._id === qualId) {
+          qualitiesArray.push(quality);
+          break;
+        }
+      }
+    }
+    return qualitiesArray;
+  }
+  const transformData = (data) => {
+    const result = getQualitiesListByIds(data).map((qual) => ({
+      label: qual.name,
+      value: qual._id
+    }));
+    return result;
+  };
+  useEffect(() => {
+    if (!professionLoading && !qualitiesLoading && currentUser && !data) {
+      setData({
+        ...currentUser,
+        qualities: transformData(currentUser.qualities)
+      });
+    }
+  }, [professionLoading, qualitiesLoading, currentUser, data]);
+  useEffect(() => {
+    if (data && isLoading) {
+      setIsLoading(false);
+    }
+  }, [data]);
+
+  const validatorConfig = {
+    email: {
+      isRequired: {
+        message: "Электронная почта обязательна для заполнения"
+      },
+      isEmail: {
+        message: "Email введен некорректно"
+      }
+    },
+    name: {
+      isRequired: {
+        message: "Введите ваше имя"
+      }
     }
   };
-
-  if (!user) {
-    return <h1>Loading</h1>;
-  }
+  useEffect(() => {
+    validate();
+  }, [data]);
+  const handleChange = (target) => {
+    setData((prevState) => ({
+      ...prevState,
+      [target.name]: target.value
+    }));
+  };
+  const validate = () => {
+    const errors = validator(data, validatorConfig);
+    setErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  const isValid = Object.keys(errors).length === 0;
   return (
-    <>
-      <div className="container mt-5">
-        <button className="btn btn-primary" onClick={handleShowUsers}>
-          Назад
-        </button>
-
-        <div className="row">
-          <div className="col-md-6 offset-md-3 shadow p-4">
+    <div className="container mt-5">
+      <BackHistoryButton />
+      <div className="row">
+        <div className="col-md-6 offset-md-3 shadow p-4">
+          {!isLoading && Object.keys(professions).length > 0 ? (
             <form onSubmit={handleSubmit}>
               <TextField
                 label="Имя"
@@ -138,7 +124,6 @@ const UserPageEdit = ({ userId }) => {
                 onChange={handleChange}
                 error={errors.name}
               />
-
               <TextField
                 label="Электронная почта"
                 name="email"
@@ -146,7 +131,6 @@ const UserPageEdit = ({ userId }) => {
                 onChange={handleChange}
                 error={errors.email}
               />
-
               <SelectField
                 label="Выбери свою профессию"
                 defaultOption="Choose..."
@@ -156,7 +140,6 @@ const UserPageEdit = ({ userId }) => {
                 value={data.profession}
                 error={errors.profession}
               />
-
               <RadioField
                 options={[
                   { name: "Male", value: "male" },
@@ -168,16 +151,13 @@ const UserPageEdit = ({ userId }) => {
                 onChange={handleChange}
                 label="Выберите ваш пол"
               />
-
               <MultiSelectField
+                defaultValue={data.qualities}
                 options={qualitiesList}
                 onChange={handleChange}
-                defaultValue={data.qualities}
                 name="qualities"
                 label="Выберите ваши качества"
               />
-              {enterError && <p className="text-danger">{enterError}</p>}
-
               <button
                 type="submit"
                 disabled={!isValid}
@@ -186,14 +166,13 @@ const UserPageEdit = ({ userId }) => {
                 Обновить
               </button>
             </form>
-          </div>
+          ) : (
+            "Loading..."
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-UserPageEdit.propTypes = {
-  userId: PropTypes.string.isRequired
-};
-export default UserPageEdit;
+export default EditUserPage;
