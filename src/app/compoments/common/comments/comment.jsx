@@ -1,8 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { getDateByTimestamp } from "../../../utils/date";
-import { useUser } from "../../../hooks/useUsers";
 import { useAuth } from "../../../hooks/useAuth";
+import { useSelector } from "react-redux";
+import { getUserById } from "../../../store/users";
 
 const Comment = ({
   comment,
@@ -12,16 +13,8 @@ const Comment = ({
   _id,
   onDelete
 }) => {
-  const { getUserById } = useUser();
   const { currentUser } = useAuth();
-  const user = getUserById(userId);
-  //   const [isLoading, setIsLoading] = useState(false);
-
-  //   useEffect(() => {
-  //     setIsLoading(true);
-  //     api.users.getById(userId).then((data) => setUser(data));
-  //     setIsLoading(false);
-  //   }, []);
+  const user = useSelector(getUserById(userId));
 
   return (
     <div className="bg-light card-body  mb-3">

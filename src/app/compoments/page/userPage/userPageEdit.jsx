@@ -8,11 +8,14 @@ import MultiSelectField from "../../common/form/multiSelectField";
 import BackHistoryButton from "../../common/backButton";
 import { useAuth } from "../../../hooks/useAuth";
 import { useSelector } from "react-redux";
-import { getQualities, getQualitiesLoadind } from "../../../../store/qualities";
+import {
+  getQualities,
+  getQualitiesLoadingStatus
+} from "../../../store/qualities";
 import {
   getProfessions,
-  getProfessionsLoading
-} from "../../../../store/professions";
+  getProfessionsLoadingStatus
+} from "../../../store/professions";
 
 const EditUserPage = () => {
   const history = useHistory();
@@ -21,7 +24,7 @@ const EditUserPage = () => {
   const { currentUser, updateUserData } = useAuth();
   const qualities = useSelector(getQualities());
 
-  const qualitiesLoading = useSelector(getQualitiesLoadind());
+  const qualitiesLoading = useSelector(getQualitiesLoadingStatus());
 
   const qualitiesList = qualities.map((q) => ({
     label: q.name,
@@ -29,7 +32,7 @@ const EditUserPage = () => {
   }));
   const professions = useSelector(getProfessions());
   console.log("professions", professions);
-  const professionLoading = useSelector(getProfessionsLoading());
+  const professionLoading = useSelector(getProfessionsLoadingStatus());
   const professionsList = professions.map((p) => ({
     label: p.name,
     value: p._id

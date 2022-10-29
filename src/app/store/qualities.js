@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
-import qualityService from "../app/services/quality.service";
+import qualityService from "../services/quality.service";
+import isOutdated from "../utils/isOutdated";
 
 const qualitiesSlice = createSlice({
   name: "qualities",
@@ -30,31 +31,35 @@ const { qualitiesRequested, qualitiesReceived, qualitiesRequestFailed } =
   actions;
 
 export const loadQualitiesList = () => async (dispatch, getState) => {
-  dispatch(qualitiesRequested());
-  try {
-    const { content } = await qualityService.fetchAll();
-
-    dispatch(qualitiesReceived(content));
-  } catch (error) {
-    dispatch(qualitiesRequestFailed(error.message));
+  const { lastFetch } = getState().qualities;
+  if (isOutdated(lastFetch)) {
+    dispatch(qualitiesRequested());
+    try {
+      const { content } = await qualityService.fetchAll();
+      dispatch(qualitiesReceived(content));
+    } catch (error) {
+      dispatch(qualitiesRequestFailed(error.message));
+    }
   }
 };
 
 export const getQualities = () => (state) => state.qualities.entities;
-export const getQualitiesLoadind = () => (state) =>
-  state.qualities.isLoadingStatus;
+export const getQualitiesLoadingStatus = () => (state) =>
+  state.qualities.isLoading;
 export const getQualitiesByIds = (qualitiesIds) => (state) => {
   if (state.qualities.entities) {
     const qualitiesArray = [];
     for (const qualId of qualitiesIds) {
-      for (const qiality of state.qualities.entities) {
-        if (qiality._id === qualId) {
-          qualitiesArray.push(qiality);
+      for (const quality of state.qualities.entities) {
+        if (quality._id === qualId) {
+          qualitiesArray.push(quality);
+          break;
         }
       }
     }
     return qualitiesArray;
   }
+  return [];
 };
 
 export default qualitiesReducer;

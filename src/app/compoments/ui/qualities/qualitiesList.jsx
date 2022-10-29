@@ -4,13 +4,13 @@ import Quality from "./qualitie";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getQualitiesByIds,
-  getQualitiesLoadind,
+  getQualitiesLoadingStatus,
   loadQualitiesList
-} from "../../../../store/qualities";
+} from "../../../store/qualities";
 
 const QualitiesList = ({ qualities }) => {
   const dispatch = useDispatch();
-  const isLoading = useSelector(getQualitiesLoadind());
+  const isLoading = useSelector(getQualitiesLoadingStatus());
   const qualitiesList = useSelector(getQualitiesByIds(qualities));
   useEffect(() => {
     dispatch(loadQualitiesList());
