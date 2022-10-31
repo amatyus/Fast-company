@@ -21,8 +21,6 @@ export const CommentsProvider = ({ children }) => {
   const currentUserId = useSelector(getCurrentUserId());
 
   useEffect(() => {
-    // setComments(null);
-    // setLoading(false);
     getComments();
   }, [userId]);
 
@@ -44,7 +42,7 @@ export const CommentsProvider = ({ children }) => {
 
   async function getComments() {
     try {
-      const { content } = await commentService.getComment(userId);
+      const { content } = await commentService.getComments(userId);
       setComments(content);
     } catch (error) {
       errorCatcher();

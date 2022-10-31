@@ -4,6 +4,7 @@ import authService from "../services/auth.service";
 import localStorageService from "../services/localStorage.service";
 import getRandomInt from "../utils/getRandomInt";
 import history from "../utils/history";
+import { generateAuthError } from "../utils/generateAuthError";
 
 const initialState = localStorageService.getAccessToken()
   ? {
@@ -97,7 +98,15 @@ export const login =
       dispatch(authRequestSuccess({ userId: data.localId }));
       localStorageService.setTokens(data);
       history.push(redirect);
-    } catch (error) {}
+    } catch (error) {
+      const { code, message } = error.response.data.error;
+      if (code === 400) {
+        const errorMessage = generateAuthError(message);
+        dispatch(authRequestFailed(errorMessage));
+      } else {
+        dispatch(authRequestFailed(error.message));
+      }
+    }
   };
 
 export const signUp =
@@ -156,7 +165,7 @@ export const loadUsersList = () => async (dispatch, getState) => {
 export const updateUser = (payload) => async (dispatch) => {
   dispatch(userUpdateRequested());
   try {
-    const { content } = await userService.patch(payload);
+    const { content } = await userService.update(payload);
     dispatch(userUpdateSuccessed(content));
     history.push(`/users/${content._id}`);
   } catch (error) {

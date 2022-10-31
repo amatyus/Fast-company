@@ -1,34 +1,45 @@
-import React from "react";
+import React, { useEffect } from "react";
 import CommentsList from "../common/comments/commentsList";
 import { orderBy } from "lodash";
 import AddComment from "../common/comments/addComment";
-import { useComments } from "../../hooks/useComments";
+import { nanoid } from "nanoid";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createComments,
+  getComments,
+  getCommentsLoadingStatus,
+  loadCommentsList,
+  removeComment
+} from "../../store/comments";
+import { getCurrentUserId } from "../../store/users";
 
 const Comments = () => {
-  //   const { userId } = useParams();
-  const { createComment, comments, removeComment } = useComments();
+  const { userId } = useParams();
+  const dispatch = useDispatch();
 
-  //   useEffect(() => {
-  //     api.comments.fetchCommentsForUser(userId).then((data) => setComments(data));
-  //   }, []);
+  const currentUserId = useSelector(getCurrentUserId());
+
+  const isLoading = useSelector(getCommentsLoadingStatus());
+  const comments = useSelector(getComments());
+
+  useEffect(() => {
+    dispatch(loadCommentsList(userId));
+  }, [userId]);
 
   const handleDeleteComment = (id) => {
-    removeComment(id);
-    //   api.comments.remove(id).then((id) => {
-    //     setComments(comments.filter((x) => x._id !== id));
-    //   });
+    dispatch(removeComment(id));
   };
 
   const handleSubmit = (data) => {
-    createComment(data);
-    // const newComment = {
-    //   pageId: userId,
-    //   userId: data.userId,
-    //   content: data.comment
-    // };
-    // return api.comments.add(newComment).then((data) => {
-    //   setComments([...comments, data]);
-    // });
+    const comment = {
+      ...data,
+      _id: nanoid(),
+      pageId: userId,
+      created_at: Date.now(),
+      userId: currentUserId
+    };
+    dispatch(createComments(comment));
   };
 
   const sortComments = orderBy(comments, ["created_at"], ["desc"]);
@@ -45,11 +56,14 @@ const Comments = () => {
           <div className="card-body ">
             <h2>Comments</h2>
             <hr />
-
-            <CommentsList
-              comments={sortComments}
-              onDelete={handleDeleteComment}
-            />
+            {!isLoading ? (
+              <CommentsList
+                comments={sortComments}
+                onDelete={handleDeleteComment}
+              />
+            ) : (
+              "Loading..."
+            )}
           </div>
         </div>
       )}

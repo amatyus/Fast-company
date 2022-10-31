@@ -9,7 +9,6 @@ const NavProfile = () => {
   const toggleMenu = () => {
     setOpen((prevState) => !prevState);
   };
-  console.log("rende");
   if (!currentUser) return " Loading...";
   return (
     <>
