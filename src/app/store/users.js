@@ -165,7 +165,7 @@ export const loadUsersList = () => async (dispatch, getState) => {
 export const updateUser = (payload) => async (dispatch) => {
   dispatch(userUpdateRequested());
   try {
-    const { content } = await userService.update(payload);
+    const { content } = await userService.patch(payload);
     dispatch(userUpdateSuccessed(content));
     history.push(`/users/${content._id}`);
   } catch (error) {

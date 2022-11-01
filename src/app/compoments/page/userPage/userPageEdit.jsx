@@ -33,7 +33,6 @@ const EditUserPage = () => {
     value: q._id
   }));
   const professions = useSelector(getProfessions());
-  console.log("professions", professions);
   const professionLoading = useSelector(getProfessionsLoadingStatus());
   const professionsList = professions.map((p) => ({
     label: p.name,
@@ -41,7 +40,7 @@ const EditUserPage = () => {
   }));
   const [errors, setErrors] = useState({});
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     const isValid = validate();
     if (!isValid) return;
